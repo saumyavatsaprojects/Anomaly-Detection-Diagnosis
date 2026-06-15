@@ -168,7 +168,7 @@ def render_chat_panel(anomaly: dict, llm_client=None) -> None:
     # ── Clear button ────────────────────────────────────────────────────────
     _, col_reset = st.columns([4, 1])
     with col_reset:
-        if st.button("Clear", key=f"reset_{aid}", use_container_width=True):
+        if st.button("Clear", key=f"reset_{aid}", width="stretch"):
             st.session_state[hist_key] = []
             st.session_state.pop(conv_key, None)
             st.session_state[proc_key] = False
@@ -246,7 +246,7 @@ def render_chat_panel(anomaly: dict, llm_client=None) -> None:
         cols = st.columns(2)
         for i, q in enumerate(questions[:4]):
             with cols[i % 2]:
-                if st.button(q, key=f"sugg_{fc}_{i}_{aid}", use_container_width=True):
+                if st.button(q, key=f"sugg_{fc}_{i}_{aid}", width="stretch"):
                     # FIX-2: set pending key, rerun; consume it at top of next run
                     st.session_state[pend_key] = q
                     st.rerun()

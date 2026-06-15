@@ -349,7 +349,7 @@ def render_anomaly_feed(anomalies: list) -> Optional[dict]:
     st.button(
         "▶ Investigating",
         key="investigating_btn",
-        use_container_width=True,
+        width="stretch",
         type="primary",
     )
 
