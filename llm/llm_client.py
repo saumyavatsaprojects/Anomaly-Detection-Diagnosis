@@ -3,7 +3,7 @@ LLM Client — Groq Backend
 ==========================
 Interfaces with the Groq API using the OpenAI-compatible SDK.
 
-Model   : llama-3.3-70b-versatile
+Model   : llama-3.1-8b-instant
 API     : https://api.groq.com/openai/v1
 SDK     : groq>=0.9.0  (pip install groq)
 
@@ -50,7 +50,7 @@ logger = logging.getLogger(__name__)
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────────────────────
 
-MODEL             = "llama-3.3-70b-versatile"
+MODEL             = "llama-3.1-8b-instant"
 MAX_TOKENS        = 1024
 CLASSIFIER_TOKENS = 10
 MAX_HISTORY       = 10
@@ -140,7 +140,7 @@ class ConversationState:
 
 class LLMClient:
     """
-    Anomaly diagnostic assistant backed by Groq (llama-3.3-70b-versatile).
+    Anomaly diagnostic assistant backed by Groq (llama-3.1-8b-instant).
 
     Quick start (Colab):
         import os
