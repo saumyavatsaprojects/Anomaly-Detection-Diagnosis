@@ -221,7 +221,7 @@ class LLMClient:
         complete     = "".join(collected)
         state.add_turn("assistant", complete)
         verification = self._verifier.verify(complete, state.assembled_context.supporting_stats)
-        if not verification.is_clean:
+        if verification.hallucination_risk not in ("none", "low"):
             logger.warning("Verification [%s initial]: %s", state.anomaly_id, verification.summary())
         yield (
             f"\n\n<!--VERIFY:"
@@ -281,7 +281,7 @@ class LLMClient:
         complete     = "".join(collected)
         state.add_turn("assistant", complete)
         verification = self._verifier.verify(complete, state.assembled_context.supporting_stats)
-        if not verification.is_clean:
+        if verification.hallucination_risk not in ("none", "low"):
             logger.warning("Verification [%s / %s]: %s", state.anomaly_id, question_type, verification.summary())
         yield (
             f"\n\n<!--VERIFY:"
