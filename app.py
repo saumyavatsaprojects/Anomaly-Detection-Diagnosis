@@ -42,8 +42,8 @@ def _get_llm_client():
     if not _inject_api_key():
         return None
     try:
-        from llm.llm_client import GroqClient
-        return GroqClient()
+        from llm.llm_client import LLMClient
+        return LLMClient()
     except Exception as exc:
         logger.warning("LLM client init failed: %s", exc)
         return None
