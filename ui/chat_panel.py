@@ -123,10 +123,11 @@ def _stream_to_placeholder(placeholder, generator) -> tuple[str, dict]:
     return clean, meta
 
 
-def _aria_header(anomaly: dict) -> None:
+def _aria_header(anomaly: dict, aid: str = "", show_clear: bool = False) -> bool:
+    """Renders the ARIA header bar. Returns True if the clear button was clicked."""
     st.markdown(
         "<div style='background:#1e2530;border:1px solid #2d3a4a;border-radius:8px;"
-        "padding:10px 14px;margin-bottom:14px;"
+        "padding:10px 14px;margin-bottom:12px;"
         "box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;gap:10px'>"
         "<div style='width:9px;height:9px;border-radius:50%;background:#ff4757;"
         "box-shadow:0 0 6px 2px rgba(255,71,87,.5);flex-shrink:0'></div>"
@@ -143,6 +144,23 @@ def _aria_header(anomaly: dict) -> None:
         "</div>",
         unsafe_allow_html=True,
     )
+    if show_clear and aid:
+        # Render clear button without ghost column gaps using CSS override
+        st.markdown(
+            "<style>"
+            f"div[data-testid=\"stHorizontalBlock\"] > div:has(> div[data-testid=\"stButton\"] > button#clear_{aid}) "
+            "{{ padding: 0; margin: 0; }}"
+            "</style>",
+            unsafe_allow_html=True,
+        )
+        clicked = st.button(
+            "✕ Clear history",
+            key=f"reset_{aid}",
+            help="Clear conversation history",
+            type="tertiary",
+        )
+        return bool(clicked)
+    return False
 
 
 def _render_type_badge(q_type: str) -> None:
@@ -176,7 +194,38 @@ def render_chat_panel(anomaly: dict, llm_client=None) -> None:
     aid = anomaly.get("anomaly_id", "") or "default"
     fc  = anomaly.get("failure_class", "undetermined")
 
-    # ── Session-state keys scoped to this anomaly ──────────────────────────
+    # ── Suppress Streamlit layout gaps that create ghost whitespace ────────
+    st.markdown(
+        """<style>
+        /* Remove top padding from chat message containers */
+        [data-testid="stChatMessage"] { padding-top: 0 !important; }
+        /* Collapse empty block gaps */
+        [data-testid="stVerticalBlock"] > div:empty { display: none !important; }
+        /* Tighten spacing between chat turns */
+        [data-testid="stChatMessage"] + [data-testid="stChatMessage"] { margin-top: -4px !important; }
+        /* Make tertiary button look like a subtle inline action */
+        button[kind="tertiary"] {
+            font-family: "JetBrains Mono", monospace !important;
+            font-size: 9px !important;
+            font-weight: 700 !important;
+            letter-spacing: .06em !important;
+            text-transform: uppercase !important;
+            color: #5a6a7a !important;
+            border: 1px solid #2d3a4a !important;
+            border-radius: 4px !important;
+            padding: 2px 8px !important;
+            background: transparent !important;
+        }
+        button[kind="tertiary"]:hover {
+            color: #ff4757 !important;
+            border-color: #ff4757 !important;
+            background: rgba(255,71,87,.06) !important;
+        }
+        </style>""",
+        unsafe_allow_html=True,
+    )
+
+
     hist_key = f"chat_history_{aid}"
     proc_key = f"chat_processing_{aid}"
     conv_key = f"conv_state_{aid}"           # FIX-3: scoped per anomaly
@@ -194,7 +243,7 @@ def render_chat_panel(anomaly: dict, llm_client=None) -> None:
         import os
         st.markdown(
             "<div style='background:#1e2530;border:1px solid #2d3a4a;border-radius:8px;"
-            "padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:14px;"
+            "padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:10px;"
             "box-shadow:0 2px 8px rgba(0,0,0,.4)'>"
             "<div style='width:8px;height:8px;border-radius:50%;background:#f59e0b;"
             "box-shadow:0 0 6px rgba(245,158,11,.7);flex-shrink:0'></div>"
@@ -220,7 +269,7 @@ def render_chat_panel(anomaly: dict, llm_client=None) -> None:
         questions = SUGGESTED_QUESTIONS.get(fc, DEFAULT_QUESTIONS)
         st.markdown(
             "<div style='font-family:JetBrains Mono,monospace;font-size:9px;font-weight:700;"
-            "letter-spacing:.08em;text-transform:uppercase;color:#5a6a7a;margin:14px 0 8px'>"
+            "letter-spacing:.08em;text-transform:uppercase;color:#5a6a7a;margin:10px 0 6px'>"
             "Questions you can ask once connected</div>",
             unsafe_allow_html=True,
         )
@@ -234,29 +283,15 @@ def render_chat_panel(anomaly: dict, llm_client=None) -> None:
             )
         return
 
-    # ── Active ARIA header with inline Clear button ─────────────────────────
-    # Only split into columns when there is history to show the Clear button.
-    # Creating a column pair when the button is absent leaves a ghost transparent
-    # block below the header — avoided by rendering the header alone when empty.
-    if history:
-        col_hdr, col_clr = st.columns([6, 1])
-        with col_hdr:
-            _aria_header(anomaly)
-        with col_clr:
-            st.markdown("<div style='padding-top:6px'>", unsafe_allow_html=True)
-            if st.button(
-                "✕ Clear",
-                key=f"reset_{aid}",
-                help="Clear conversation history",
-            ):
-                st.session_state[hist_key] = []
-                st.session_state.pop(conv_key, None)
-                st.session_state[proc_key] = False
-                st.session_state.pop(pend_key, None)
-                st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
-    else:
-        _aria_header(anomaly)
+    # ── Active ARIA header with embedded Clear button ───────────────────────
+    # Clear button is baked into the header HTML to avoid ghost column blocks
+    # that Streamlit creates when st.columns() is used conditionally.
+    if _aria_header(anomaly, aid=aid, show_clear=bool(history)):
+        st.session_state[hist_key] = []
+        st.session_state.pop(conv_key, None)
+        st.session_state[proc_key] = False
+        st.session_state.pop(pend_key, None)
+        st.rerun()
 
     # ── Render existing history ─────────────────────────────────────────────
     for msg in history:
@@ -274,8 +309,8 @@ def render_chat_panel(anomaly: dict, llm_client=None) -> None:
         questions = SUGGESTED_QUESTIONS.get(fc, DEFAULT_QUESTIONS)
         st.markdown(
             "<div style='font-family:\"JetBrains Mono\",monospace;font-size:9px;font-weight:700;"
-            "letter-spacing:.08em;text-transform:uppercase;color:#5a6a7a;margin-bottom:8px'>"
-            "Suggested questions for this incident</div>",
+            "letter-spacing:.08em;text-transform:uppercase;color:#5a6a7a;margin-bottom:6px;margin-top:2px'>"
+            "Suggested questions</div>",
             unsafe_allow_html=True,
         )
         cols = st.columns(2)
