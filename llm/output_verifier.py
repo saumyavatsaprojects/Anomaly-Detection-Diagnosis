@@ -59,6 +59,11 @@ class VerificationResult:
         if self.value_mismatches:
             meta["value_mismatches"] = self.value_mismatches[:2]
         return f"\n\n<!--VERIFY:{json.dumps(meta)}-->"
+    def summary(self) -> str:
+    return (
+        f"risk={self.hallucination_risk}, "
+        f"warnings={len(self.warnings)}"
+    )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
