@@ -73,6 +73,27 @@ DEFAULT_QUESTIONS = [
 ]
 
 
+def _coerce_meta(obj) -> dict:
+    """
+    Ensure meta is always a plain dict with 'risk' and 'warnings' keys.
+
+    The LLM client may return a typed VerificationResult object (or similar)
+    instead of a plain dict.  Accessing .is_clean or other attributes that
+    don't exist on a dict raises AttributeError.  We normalise here so the
+    rest of the panel only ever sees a plain dict.
+    """
+    if isinstance(obj, dict):
+        return obj
+    # Typed object — pull out the fields we care about defensively
+    risk = getattr(obj, "risk", None) or ("none" if getattr(obj, "is_clean", True) else "high")
+    warnings = list(getattr(obj, "warnings", []) or [])
+    question_type = getattr(obj, "question_type", None)
+    result: dict = {"risk": risk, "warnings": warnings}
+    if question_type is not None:
+        result["question_type"] = question_type
+    return result
+
+
 def _stream_to_placeholder(placeholder, generator) -> tuple[str, dict]:
     """
     Consume the streaming generator, update the placeholder live,
@@ -89,14 +110,15 @@ def _stream_to_placeholder(placeholder, generator) -> tuple[str, dict]:
     match = SENTINEL_RE.search(full)
     if match:
         try:
-            meta = json.loads(match.group(1))
+            raw_meta = json.loads(match.group(1))
         except Exception:
-            meta = {"risk": "unknown", "warnings": []}
+            raw_meta = {"risk": "unknown", "warnings": []}
         clean = SENTINEL_RE.sub("", full).strip()
     else:
-        meta  = {"risk": "none", "warnings": []}
+        raw_meta  = {"risk": "none", "warnings": []}
         clean = full.strip()
 
+    meta = _coerce_meta(raw_meta)
     placeholder.markdown(clean)
     return clean, meta
 
@@ -213,13 +235,14 @@ def render_chat_panel(anomaly: dict, llm_client=None) -> None:
         return
 
     # ── Active ARIA header with inline Clear button ─────────────────────────
-    # Render header and clear button in the same row — no ghost column spacer
-    col_hdr, col_clr = st.columns([6, 1])
-    with col_hdr:
-        _aria_header(anomaly)
-    with col_clr:
-        # Compact clear — only visible when there is history to clear
-        if history:
+    # Only split into columns when there is history to show the Clear button.
+    # Creating a column pair when the button is absent leaves a ghost transparent
+    # block below the header — avoided by rendering the header alone when empty.
+    if history:
+        col_hdr, col_clr = st.columns([6, 1])
+        with col_hdr:
+            _aria_header(anomaly)
+        with col_clr:
             st.markdown("<div style='padding-top:6px'>", unsafe_allow_html=True)
             if st.button(
                 "✕ Clear",
@@ -232,6 +255,8 @@ def render_chat_panel(anomaly: dict, llm_client=None) -> None:
                 st.session_state.pop(pend_key, None)
                 st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
+    else:
+        _aria_header(anomaly)
 
     # ── Render existing history ─────────────────────────────────────────────
     for msg in history:
@@ -307,6 +332,7 @@ def render_chat_panel(anomaly: dict, llm_client=None) -> None:
                 placeholder,
                 llm_client.ask_followup_stream(state, question),
             )
+            meta     = _coerce_meta(meta)
             q_type   = meta.get("question_type", "metric_detail")
             h_risk   = meta.get("risk", "none")
             warnings = meta.get("warnings", [])
