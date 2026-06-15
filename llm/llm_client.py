@@ -50,7 +50,7 @@ logger = logging.getLogger(__name__)
 # CONFIGURATION
 # ─────────────────────────────────────────────────────────────────────────────
 
-MODEL             = "llama-3.1-8b-instant"
+MODEL             = "meta-llama/llama-4-scout-17b-16e-instruct"
 MAX_TOKENS        = 1024
 CLASSIFIER_TOKENS = 10
 MAX_HISTORY       = 10
@@ -140,7 +140,7 @@ class ConversationState:
 
 class LLMClient:
     """
-    Anomaly diagnostic assistant backed by Groq (llama-3.1-8b-instant).
+    Anomaly diagnostic assistant backed by Groq (meta-llama/llama-4-scout-17b-16e-instruct).
 
     Quick start (Colab):
         import os
