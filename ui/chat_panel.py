@@ -103,19 +103,21 @@ def _stream_to_placeholder(placeholder, generator) -> tuple[str, dict]:
 
 def _aria_header(anomaly: dict) -> None:
     st.markdown(
-        "<div style='background:#2d3436;border-radius:8px;padding:11px 14px;margin-bottom:12px;"
-        "box-shadow:8px 8px 16px #babecc,-8px -8px 16px #ffffff;display:flex;align-items:center;gap:10px'>"
-        "<div style='width:10px;height:10px;border-radius:50%;background:#ff4757;"
-        "box-shadow:0 0 8px 2px rgba(255,71,87,.7);flex-shrink:0'></div>"
+        "<div style='background:#1e2530;border:1px solid #2d3a4a;border-radius:8px;"
+        "padding:10px 14px;margin-bottom:14px;"
+        "box-shadow:0 2px 8px rgba(0,0,0,.4);display:flex;align-items:center;gap:10px'>"
+        "<div style='width:9px;height:9px;border-radius:50%;background:#ff4757;"
+        "box-shadow:0 0 6px 2px rgba(255,71,87,.5);flex-shrink:0'></div>"
         "<div>"
         "<div style='font-family:\"JetBrains Mono\",monospace;font-size:11px;font-weight:700;"
         "letter-spacing:.1em;text-transform:uppercase;color:#e0e5ec'>ARIA</div>"
-        "<div style='font-family:\"JetBrains Mono\",monospace;font-size:9px;color:#636e72;"
-        "letter-spacing:.06em'>Anomaly Response &amp; Intelligence Assistant</div>"
+        "<div style='font-family:\"JetBrains Mono\",monospace;font-size:9px;color:#5a6a7a;"
+        "letter-spacing:.04em'>Anomaly Response &amp; Intelligence Assistant</div>"
         "</div>"
         "<div style='margin-left:auto;font-family:\"JetBrains Mono\",monospace;font-size:9px;"
         "font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#22c55e;"
-        "background:rgba(34,197,94,.1);padding:3px 8px;border-radius:3px'>ONLINE</div>"
+        "background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);"
+        "padding:2px 8px;border-radius:4px'>ONLINE</div>"
         "</div>",
         unsafe_allow_html=True,
     )
@@ -165,30 +167,20 @@ def render_chat_panel(anomaly: dict, llm_client=None) -> None:
 
     history = st.session_state[hist_key]
 
-    # ── Clear button ────────────────────────────────────────────────────────
-    _, col_reset = st.columns([4, 1])
-    with col_reset:
-        if st.button("Clear", key=f"reset_{aid}", width="stretch"):
-            st.session_state[hist_key] = []
-            st.session_state.pop(conv_key, None)
-            st.session_state[proc_key] = False
-            st.session_state.pop(pend_key, None)
-            st.rerun()
-
     # ── No-API-key state ────────────────────────────────────────────────────
     if llm_client is None:
         import os
         st.markdown(
-            "<div style='background:#2d3436;border-radius:8px;padding:10px 14px;"
-            "display:flex;align-items:center;gap:10px;margin-bottom:12px;"
-            "box-shadow:8px 8px 16px #babecc,-8px -8px 16px #fff'>"
+            "<div style='background:#1e2530;border:1px solid #2d3a4a;border-radius:8px;"
+            "padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:14px;"
+            "box-shadow:0 2px 8px rgba(0,0,0,.4)'>"
             "<div style='width:8px;height:8px;border-radius:50%;background:#f59e0b;"
-            "box-shadow:0 0 8px rgba(245,158,11,.8);flex-shrink:0'></div>"
+            "box-shadow:0 0 6px rgba(245,158,11,.7);flex-shrink:0'></div>"
             "<span style='font-family:JetBrains Mono,monospace;font-size:11px;"
             "font-weight:700;letter-spacing:.06em;text-transform:uppercase;"
             "color:#e0e5ec;white-space:nowrap'>ARIA offline</span>"
             "<span style='font-family:JetBrains Mono,monospace;font-size:10px;"
-            "color:#a8b2d1;margin-left:4px'>· add Groq API key to activate</span>"
+            "color:#5a6a7a;margin-left:4px'>· add Groq API key in sidebar to activate</span>"
             "</div>",
             unsafe_allow_html=True,
         )
@@ -205,23 +197,41 @@ def render_chat_panel(anomaly: dict, llm_client=None) -> None:
 
         questions = SUGGESTED_QUESTIONS.get(fc, DEFAULT_QUESTIONS)
         st.markdown(
-            "<div style='font-family:JetBrains Mono,monospace;font-size:9px;font-weight:500;"
-            "letter-spacing:.06em;text-transform:uppercase;color:#9ca3af;margin:12px 0 6px'>"
+            "<div style='font-family:JetBrains Mono,monospace;font-size:9px;font-weight:700;"
+            "letter-spacing:.08em;text-transform:uppercase;color:#5a6a7a;margin:14px 0 8px'>"
             "Questions you can ask once connected</div>",
             unsafe_allow_html=True,
         )
         for q in questions:
             st.markdown(
                 f"<div style='font-family:JetBrains Mono,monospace;font-size:11px;"
-                f"color:#4a5568;padding:6px 10px;background:#e0e5ec;border-radius:6px;"
-                f"margin-bottom:4px;box-shadow:4px 4px 8px #babecc,-4px -4px 8px #fff'>"
-                f"— {q}</div>",
+                f"color:#8892a4;padding:7px 12px;background:#1a2030;"
+                f"border:1px solid #2d3a4a;border-radius:6px;margin-bottom:5px'>"
+                f"→ {q}</div>",
                 unsafe_allow_html=True,
             )
         return
 
-    # ── Active ARIA header ──────────────────────────────────────────────────
-    _aria_header(anomaly)
+    # ── Active ARIA header with inline Clear button ─────────────────────────
+    # Render header and clear button in the same row — no ghost column spacer
+    col_hdr, col_clr = st.columns([6, 1])
+    with col_hdr:
+        _aria_header(anomaly)
+    with col_clr:
+        # Compact clear — only visible when there is history to clear
+        if history:
+            st.markdown("<div style='padding-top:6px'>", unsafe_allow_html=True)
+            if st.button(
+                "✕ Clear",
+                key=f"reset_{aid}",
+                help="Clear conversation history",
+            ):
+                st.session_state[hist_key] = []
+                st.session_state.pop(conv_key, None)
+                st.session_state[proc_key] = False
+                st.session_state.pop(pend_key, None)
+                st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
 
     # ── Render existing history ─────────────────────────────────────────────
     for msg in history:
@@ -239,14 +249,14 @@ def render_chat_panel(anomaly: dict, llm_client=None) -> None:
         questions = SUGGESTED_QUESTIONS.get(fc, DEFAULT_QUESTIONS)
         st.markdown(
             "<div style='font-family:\"JetBrains Mono\",monospace;font-size:9px;font-weight:700;"
-            "letter-spacing:.1em;text-transform:uppercase;color:#636e72;margin-bottom:8px'>"
+            "letter-spacing:.08em;text-transform:uppercase;color:#5a6a7a;margin-bottom:8px'>"
             "Suggested questions for this incident</div>",
             unsafe_allow_html=True,
         )
         cols = st.columns(2)
         for i, q in enumerate(questions[:4]):
             with cols[i % 2]:
-                if st.button(q, key=f"sugg_{fc}_{i}_{aid}", width="stretch"):
+                if st.button(q, key=f"sugg_{fc}_{i}_{aid}", use_container_width=True):
                     # FIX-2: set pending key, rerun; consume it at top of next run
                     st.session_state[pend_key] = q
                     st.rerun()
@@ -286,8 +296,13 @@ def render_chat_panel(anomaly: dict, llm_client=None) -> None:
         st.markdown(question)
 
     with st.chat_message("assistant"):
-        placeholder = st.empty()
+        # NOTE: we do NOT call st.empty() here before we need it.
+        # st.empty() used to create a ghost transparent block in Streamlit because
+        # the placeholder was allocated immediately but left unfilled until the
+        # generator yielded its first chunk. Instead we create it inside the try block.
+        placeholder = None
         try:
+            placeholder = st.empty()
             clean_text, meta = _stream_to_placeholder(
                 placeholder,
                 llm_client.ask_followup_stream(state, question),
@@ -317,7 +332,11 @@ def render_chat_panel(anomaly: dict, llm_client=None) -> None:
                 answer = "⏱ Rate limit reached. Please wait a moment and retry."
             else:
                 answer = f"ARIA error: `{err[:120]}`"
-            placeholder.markdown(answer)
+
+            if placeholder is not None:
+                placeholder.markdown(answer)
+            else:
+                st.markdown(answer)
 
             # FIX-4: still commit both turns so history is consistent
             history.append({"role": "user", "content": question})
