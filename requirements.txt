@@ -1,0 +1,31 @@
+# ─────────────────────────────────────────────────────────────
+# Anomaly Diagnostic Assistant — Python dependencies
+# Python 3.10 / 3.11 / 3.12
+# Tested on: Google Colab · Streamlit Community Cloud
+# Install: pip install -r requirements.txt
+# ─────────────────────────────────────────────────────────────
+
+# ── Core data stack ──────────────────────────────────────────
+numpy>=1.24.0
+pandas>=2.0.0
+scipy>=1.10.0
+
+# ── Time-series decomposition (STL) ──────────────────────────
+# Used by feature_engineer.py (volume detector baseline)
+# Falls back to rolling-mean if not installed — install for best results
+statsmodels>=0.14.0
+
+# ── LLM provider (Groq — fast inference, OpenAI-compatible) ──
+# Free tier: https://console.groq.com
+# Model used: llama-3.3-70b-versatile
+groq>=0.9.0
+
+# ── Web application ───────────────────────────────────────────
+streamlit>=1.31.0
+
+# ── Charting ──────────────────────────────────────────────────
+plotly>=5.18.0
+
+# ── Utilities ─────────────────────────────────────────────────
+python-dateutil>=2.8.2
+scikit-learn>=1.3.0

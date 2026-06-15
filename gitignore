@@ -1,0 +1,41 @@
+# ── Secrets — NEVER commit ───────────────────────────────────
+.streamlit/secrets.toml
+*.env
+.env.*
+
+# ── Generated data — too large for git ───────────────────────
+data/*.csv
+data/*.json
+data/*.md
+data/*.parquet
+
+# ── Python artifacts ──────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Virtual environments ──────────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ── IDE / OS ──────────────────────────────────────────────────
+.idea/
+.vscode/
+*.DS_Store
+Thumbs.db
+
+# ── Jupyter / Colab notebooks (optional — keep if you want) ──
+# *.ipynb
+
+# ── Pytest / coverage ─────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/

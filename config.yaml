@@ -1,0 +1,45 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Financial assumptions
+# These values drive revenue-at-risk and interchange-loss calculations.
+# Adjust to match your card programme before deploying.
+# ─────────────────────────────────────────────────────────────────────────────
+
+financial:
+  # Interchange rate as a decimal (e.g. 0.018 = 1.8%)
+  # Typical ranges:
+  #   0.002 – 0.005  EU regulated debit (PSD2)
+  #   0.015 – 0.020  Standard UK/EU credit
+  #   0.020 – 0.025  Premium/rewards credit
+  #   0.020 – 0.030  US consumer credit (unregulated)
+  interchange_rate: 0.018
+
+  # Default avg ticket size (£) used when no fraud_evidence.avg_ticket present
+  default_avg_ticket_gbp: 42.0
+
+  # Currency symbol shown in UI
+  currency_symbol: "£"
+
+  # Fraud cost per chargebacked transaction (£)
+  # Used to compute total fraud cost = fraud_count * cost_per_fraud
+  fraud_cost_per_event_gbp: 85.0
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Detection thresholds
+# ─────────────────────────────────────────────────────────────────────────────
+
+detection:
+  rate_sigma_threshold:    3.0    # σ below this triggers rate_drop
+  ewma_drift_threshold:    0.010  # pp over 7 days triggers rate_drift
+  chi2_p_threshold:        0.001  # chi-squared p-value for RC shift
+  kl_threshold:            0.10   # KL divergence for fraud concentration
+  volume_sigma_threshold:  2.2    # σ for volume spike
+  min_txn_volume:          100    # minimum transactions to confirm anomaly
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Pipeline
+# ─────────────────────────────────────────────────────────────────────────────
+
+pipeline:
+  max_final_anomalies: 25
+  data_window_days:    90
+  baseline_period_days: 14
