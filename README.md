@@ -54,34 +54,48 @@ A Groq API key (free tier, high rate limits — used instead of OpenAI/Anthropic
 1. Clone the repository
 bash
 git clone https://github.com/saumyavatsaprojects/Anomaly-Detection-Diagnosis/.git
+
 cd Anomaly-Detection-Diagnosis
 
 3. Create a virtual environment
 bash
 python -m venv venv
+
 source venv/bin/activate    	  macOS/Linux
+
 venv\Scripts\activate       	  Windows
 
 5. Install dependencies
 bash
+
 pip install -r requirements.txt
 
 7. Set your API key
 Create a .env file in the project root:
+
 GROQ_API_KEY=your_groq_api_key_here
+
+
 Or export it directly in your terminal:
+
 bash
+
 export GROQ_API_KEY=your_groq_api_key_here
 
 **Running the App**
 
 Option A: Full pipeline (generate data, detect, launch UI)
+
 bash
+
 python run_pipeline.py
+
 streamlit run app.py
 
 Option B: Step by step
+
 bash
+
   1. Generate synthetic data
 python data_generator.py
  
