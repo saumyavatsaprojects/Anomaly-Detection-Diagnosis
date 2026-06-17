@@ -123,11 +123,11 @@ Streamlit Community Cloud
 
 The app is deployed at:
 
-**Add your API key in the Streamlit Cloud app under Settings > Secrets:
+Add your API key in the Streamlit Cloud app under Settings > Secrets:
 
 toml
 
-GROQ_API_KEY = "your_groq_api_key_here"**
+GROQ_API_KEY = "your_groq_api_key_here"
 
 ## Project structure
 
