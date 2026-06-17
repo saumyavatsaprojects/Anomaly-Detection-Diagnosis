@@ -48,6 +48,7 @@ Synthetic data  →  Feature engineering  →  4 detectors  →  Root cause attr
 **Prerequisites**
 
 Python 3.9 or higher
+
 A Groq API key (free tier, high rate limits — used instead of OpenAI/Anthropic due to volume of testing required)
 
 **Git**
@@ -56,26 +57,26 @@ A Groq API key (free tier, high rate limits — used instead of OpenAI/Anthropic
 
 bash
 
-**git clone https://github.com/saumyavatsaprojects/Anomaly-Detection-Diagnosis/.git
+git clone https://github.com/saumyavatsaprojects/Anomaly-Detection-Diagnosis/.git
 
-cd Anomaly-Detection-Diagnosis**
+cd Anomaly-Detection-Diagnosis
 
 2. Create a virtual environment
 
 bash
 
-**python -m venv venv
+python -m venv venv
 
 source venv/bin/activate    	  macOS/Linux
 
-venv\Scripts\activate       	  Windows**
+venv\Scripts\activate       	  Windows
 
 3. Install dependencies
 
-**bash
+bash
 
 pip install -r requirements.txt
-**
+
 4. Set your API key
 
 Create a .env file in the project root:
@@ -85,19 +86,19 @@ Create a .env file in the project root:
 
 Or export it directly in your terminal:
 
-**bash
+bash
 
-export GROQ_API_KEY=your_groq_api_key_here**
+export GROQ_API_KEY=your_groq_api_key_here
 
 **Running the App**
 
 Option A: Full pipeline (generate data, detect, launch UI)
 
-**bash
+bash
 
 python run_pipeline.py
 
-streamlit run app.py**
+streamlit run app.py
 
 Option B: Step by step
 
