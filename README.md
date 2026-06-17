@@ -46,51 +46,58 @@ Synthetic data  →  Feature engineering  →  4 detectors  →  Root cause attr
 ## Setup and Installation
 
 **Prerequisites**
+
 Python 3.9 or higher
 A Groq API key (free tier, high rate limits — used instead of OpenAI/Anthropic due to volume of testing required)
 
 **Git**
 
 1. Clone the repository
-bash
-git clone https://github.com/saumyavatsaprojects/Anomaly-Detection-Diagnosis/.git
 
-cd Anomaly-Detection-Diagnosis
-
-3. Create a virtual environment
 bash
-python -m venv venv
+
+**git clone https://github.com/saumyavatsaprojects/Anomaly-Detection-Diagnosis/.git
+
+cd Anomaly-Detection-Diagnosis**
+
+2. Create a virtual environment
+
+bash
+
+**python -m venv venv
 
 source venv/bin/activate    	  macOS/Linux
 
-venv\Scripts\activate       	  Windows
+venv\Scripts\activate       	  Windows**
 
-5. Install dependencies
-bash
+3. Install dependencies
+
+**bash
 
 pip install -r requirements.txt
+**
+4. Set your API key
 
-7. Set your API key
 Create a .env file in the project root:
 
-GROQ_API_KEY=your_groq_api_key_here
+**GROQ_API_KEY=your_groq_api_key_here**
 
 
 Or export it directly in your terminal:
 
-bash
+**bash
 
-export GROQ_API_KEY=your_groq_api_key_here
+export GROQ_API_KEY=your_groq_api_key_here**
 
 **Running the App**
 
 Option A: Full pipeline (generate data, detect, launch UI)
 
-bash
+**bash
 
 python run_pipeline.py
 
-streamlit run app.py
+streamlit run app.py**
 
 Option B: Step by step
 
@@ -110,11 +117,16 @@ python pipeline/root_cause.py
  
   5. Launch UI
 streamlit run app.py
+
 Streamlit Community Cloud
+
 The app is deployed at:
-Add your API key in the Streamlit Cloud app under Settings > Secrets:
+
+**Add your API key in the Streamlit Cloud app under Settings > Secrets:
+
 toml
-GROQ_API_KEY = "your_groq_api_key_here"
+
+GROQ_API_KEY = "your_groq_api_key_here"**
 
 ## Project structure
 
