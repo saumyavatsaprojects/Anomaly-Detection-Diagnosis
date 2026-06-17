@@ -42,158 +42,65 @@ Synthetic data  →  Feature engineering  →  4 detectors  →  Root cause attr
 
 ---
 
-## Quick start — Google Colab
 
-### Step 1 — Clone and install
+## Setup and Installation
 
-```python
-# Cell 1
-!git clone https://github.com/YOUR_USERNAME/anomaly-diagnostic-assistant.git
-%cd anomaly-diagnostic-assistant
-!pip install -r requirements.txt
-```
+**Prerequisites**
+Python 3.9 or higher
+A Groq API key (free tier, high rate limits — used instead of OpenAI/Anthropic due to volume of testing required)
 
-### Step 2 — Set your Groq API key
+**Git**
 
-Get your free API key at https://console.groq.com
+1. Clone the repository
+bash
+git clone https://github.com/saumyavatsaprojects/Anomaly-Detection-Diagnosis/.git
+cd Anomaly-Detection-Diagnosis
 
-```python
-# Cell 2
-import os
-# Option A: type directly (for quick testing — do not share the notebook)
-os.environ["GROQ_API_KEY"] = "gsk_..."
-
-# Option B: use Colab secrets (recommended)
-# from google.colab import userdata
-# os.environ["GROQ_API_KEY"] = userdata.get("GROQ_API_KEY")
-```
-
-### Step 3 — Run the data pipeline
-
-```python
-# Cell 3 — generates synthetic data + runs all detectors (~2–3 minutes)
-!python run_pipeline.py
-```
-
-Expected output:
-```
-[1/4] Generating synthetic transaction data...
-      Rows: 327,471 | Txns: 3,421,968 | Anomalies injected: 5
-[2/4] Engineering features...
-      Feature store: 327,471 rows | Slices: 192
-[3/4] Running anomaly detectors...
-      Volume detector:    3 anomalies
-      Rate detector:      8 anomalies
-      Reason code detector: 5 anomalies
-      Fraud detector:     2 anomalies
-      Total unique:       12 anomalies flagged
-[4/4] Root cause attribution...
-      Enriched: 12 anomaly briefs written to data/anomaly_objects.json
-Pipeline complete.
-```
-
-### Step 4 — Launch Streamlit in Colab
-
-```python
-# Cell 4
-!pip install streamlit pyngrok -q
-from pyngrok import ngrok
-import subprocess, threading, time
-
-def run_streamlit():
-    subprocess.run(["streamlit", "run", "app.py",
-                    "--server.port=8501",
-                    "--server.headless=true"])
-
-threading.Thread(target=run_streamlit, daemon=True).start()
-time.sleep(5)
-
-# Create public tunnel
-public_url = ngrok.connect(8501)
-print(f"\n  Open your app: {public_url}\n")
-```
-
----
-
-## Local development
-
-### Prerequisites
-- Python 3.10 or 3.11
-- A Groq API key
-  Get your free key at https://console.groq.com
-
-### Setup
-
-```bash
-# 1. Clone
-git clone https://github.com/YOUR_USERNAME/anomaly-diagnostic-assistant.git
-cd anomaly-diagnostic-assistant
-
-# 2. Create virtual environment
+3. Create a virtual environment
+bash
 python -m venv venv
-source venv/bin/activate          # Windows: venv\Scripts\activate
+source venv/bin/activate    	  macOS/Linux
+venv\Scripts\activate       	  Windows
 
-# 3. Install dependencies
+5. Install dependencies
+bash
 pip install -r requirements.txt
 
-# 4. Set API key
-cp .streamlit/secrets.toml.example .streamlit/secrets.toml
-# Edit .streamlit/secrets.toml and add your key
+7. Set your API key
+Create a .env file in the project root:
+GROQ_API_KEY=your_groq_api_key_here
+Or export it directly in your terminal:
+bash
+export GROQ_API_KEY=your_groq_api_key_here
 
-# 5. Generate data and run detectors
+**Running the App**
+
+Option A: Full pipeline (generate data, detect, launch UI)
+bash
 python run_pipeline.py
-
-# 6. Launch the app
 streamlit run app.py
-```
 
-The app opens at `http://localhost:8501`.
-
----
-
-## Deploying to Streamlit Community Cloud
-
-### Step 1 — Push to GitHub
-
-```bash
-git init
-git add .
-git commit -m "Initial commit — anomaly diagnostic assistant POC"
-git remote add origin https://github.com/YOUR_USERNAME/anomaly-diagnostic-assistant.git
-git push -u origin main
-```
-
-**Important:** verify `.gitignore` is working before pushing:
-```bash
-git status   # data/*.csv and .streamlit/secrets.toml must NOT appear
-```
-
-### Step 2 — Create the Streamlit app
-
-1. Go to [share.streamlit.io](https://share.streamlit.io)
-2. Sign in with your GitHub account
-3. Click **New app**
-4. Repository: `YOUR_USERNAME/anomaly-diagnostic-assistant`
-5. Branch: `main`
-6. Main file path: `app.py`
-7. Click **Advanced settings**
-
-### Step 3 — Add secrets
-
-In Advanced settings → Secrets, paste:
-```toml
-GROQ_API_KEY = "gsk_..."
-```
-
-Click **Deploy**.
-
-### Step 4 — First-run data generation
-
-On first deploy, the app detects that `data/anomaly_objects.json` does not exist
-and automatically runs the pipeline. This takes 2–3 minutes. A spinner is shown.
-Subsequent loads use the cached data.
-
----
+Option B: Step by step
+bash
+  1. Generate synthetic data
+python data_generator.py
+ 
+  2. Engineer features
+python pipeline/feature_engineer.py
+ 
+  3. Run detectors
+python pipeline/run_detectors.py
+ 
+  4. Root cause attribution
+python pipeline/root_cause.py
+ 
+  5. Launch UI
+streamlit run app.py
+Streamlit Community Cloud
+The app is deployed at:
+Add your API key in the Streamlit Cloud app under Settings > Secrets:
+toml
+GROQ_API_KEY = "your_groq_api_key_here"
 
 ## Project structure
 
